@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Roue</title>
+<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-black text-white">
+<div id="root"></div>
+
+<script type="text/babel">
+const { useState, useEffect } = React;
+
+const segments = [
+  { name: '2 tokens', type: 'token', value: 2 },
+  { name: 'Cadeaux', type: 'gift', value: 0 },
+  { name: '5 tokens', type: 'token', value: 5 },
+  { name: 'Oups', type: 'lose', value: 0 },
+  { name: '1 token', type: 'token', value: 1 }
+];
+
+function App() {
+  const [page, setPage] = useState('game');
+  const [rotation, setRotation] = useState(0);
+  const [spinning, setSpinning] = useState(false);
+  const [result, setResult] = useState(null);
+  const [tokens, setTokens] = useState(1);
+  const [uid, setUid] = useState('');
+  const [pseudo, setPseudo] = useState('');
+  const [spins, setSpins] = useState([]);
+
+  useEffect(() => {
+    if (page === 'admin') {
+      fetch('/api/spins').then(r => r.json()).then(setSpins);
+    }
+  }, [page]);
+
+  const spin = async () => {
+    if (spinning || tokens < 1) return alert("Pas assez de tokens");
+    if (!uid ||!pseudo) return alert("Rentre UID et pseudo");
+
+    setSpinning(true);
+    setTokens(tokens - 1);
+
+    const randomAngle = Math.floor(Math.random() * 360);
+    const newRotation = rotation + 360 * 3 + randomAngle;
+    setRotation(newRotation);
+
+    setTimeout(async () => {
+      const finalAngle = 360 - (newRotation % 360);
+      const winningIndex = Math.floor(finalAngle / 72) % 5;
+      const win = segments[winningIndex];
+      setResult(win);
+
+      await fetch('/api/spin', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ uid, pseudo, result: win.name, type: win.type, value: win.value })
+      });
+
+      if (win.type === 'token') setTokens(prev => prev + win.value);
+      setSpinning(false);
+    }, 3000);
+  };
+
+  const addToken = async () => {
+    const amount = prompt("Combien de tokens à ajouter?");
+    if (!amount ||!uid) return;
+    await fetch('/api/add-token', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ uid, amount: parseInt(amount) })
+    });
+    alert('Tokens ajoutés');
+  };
+
+  if (page === 'admin') {
+    return (
+      <div className="p-6 max-w-4xl mx-auto">
+        <button onClick={() => setPage('game')} className="mb-4 text-orange-400">← Retour</button>
+        <h1 className="text-3xl font-bold mb-6">Admin</h1>
+        <div className="bg-gray-800 p-4 rounded-lg mb-6 flex gap-3">
+          <input placeholder="UID joueur" value={uid} onChange={e => setUid(e.target.value)}
+            className="flex-1 p-2 rounded bg-gray-700" />
+          <button onClick={addToken} className="px-4 bg-green-600 rounded">Ajouter Token</button>
+        </div>
+        <h2 className="text-xl font-bold mb-3">Historique</h2>
+        <div className="bg-gray-800 rounded-lg">
+          {spins.map((s, i) => (
+            <div key={i} className="p-3 border-b border-gray-700 flex justify-between">
+              <span>{s.pseudo} [{s.uid}]</span>
+              <span className="text-orange-400">{s.result}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col items-center gap-6 p-6 max-w-lg mx-auto">
+      <div className="w-full flex justify-between">
+        <h1 className="text-3xl font-bold text-orange-400">Roue</h1>
+        <button onClick={() => setPage('admin')} className="text-sm text-gray-400">Admin</button>
+      </div>
+
+      <div className="w-full space-y-3">
+        <input placeholder="UID" value={uid} onChange={e => setUid(e.target.value)}
+          className="w-full p-3 rounded bg-gray-800" />
+        <input placeholder="Pseudo" value={pseudo} onChange={e => setPseudo(e.target.value)}
+          className="w-full p-3 rounded bg-gray-800" />
+        <div className="text-center">Tokens: <span className="text-orange-400 font-bold">{tokens}</span></div>
+      </div>
+
+      <div className="relative w-80 h-80">
+        <img src="wheel.png" alt="Roue"
+          style={{ transform: `rotate(${rotation}deg)`, transition: 'transform 3s cubic-bezier(0.17, 0.67, 0.12, 0.99)' }}
+          className="w-full h-full" draggable={false} />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-0 h-0
+                        border-l-8 border-r-8 border-b-12
+                        border-l-transparent border-r-transparent border-b-white"></div>
+      </div>
+
+      <button onClick={spin} disabled={spinning}
+        className="px-8 py-3 bg-orange-500 hover:bg-orange-600 rounded-lg font-bold disabled:opacity-50">
+        {spinning? 'Ça tourne...' : 'Tourner 1 Token'}
+      </button>
+
+      {result && (
+        <div className="text-2xl font-bold text-center">
+          Tu as gagné : <span className="text-orange-400">{result.name}</span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+                                            </html>
