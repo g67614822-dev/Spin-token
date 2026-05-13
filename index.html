@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FF Diamonds Panel</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif}
+  body{background:#0a0a14;color:#fff;overflow-x:hidden}
+ .neon{box-shadow:0 0 20px #00f7ff,0 0 40px #7b2cbf}
+ .container{max-width:1200px;margin:0 auto;padding:20px}
+ .login,.shop{display:none}
+ .active{display:block}
+ .card{background:#161625;border-radius:16px;padding:30px;border:1px solid #2a2a40}
+  input,select,button{width:100%;padding:14px;margin:10px 0;border-radius:10px;border:none;background:#1f1f35;color:#fff;font-size:16px}
+  button{background:linear-gradient(90deg,#7b2cbf,#00f7ff);cursor:pointer;font-weight:bold;transition:0.3s}
+  button:hover{transform:scale(1.02);box-shadow:0 0 25px #00f7ff}
+ .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px}
+ .price-card{border:1px solid #7b2cbf;padding:20px;text-align:center;cursor:pointer;transition:0.3s}
+ .price-card:hover{transform:translateY(-5px);box-shadow:0 0 30px #7b2cbf}
+  img{max-width:100%;border-radius:12px}
+ .badge{background:#ff006e;padding:5px 10px;border-radius:20px;font-size:12px}
+</style>
+</head>
+<body>
+<div class="container">
+  <!-- LOGIN -->
+  <div class="login active" id="loginPage">
+    <div class="card neon">
+      <h2 style="text-align:center;margin-bottom:20px">🔥 FF Diamonds Login</h2>
+      <input type="email" id="email" placeholder="Email">
+      <input type="password" id="password" placeholder="Mot de passe">
+      <button onclick="login()">Se connecter</button>
+      <p style="text-align:center">Pas de compte? <a href="#" onclick="toggleAuth()">Créer un compte</a></p>
+    </div>
+  </div>
+
+  <!-- SHOP -->
+  <div class="shop" id="shopPage">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:30px">
+      <h1>🔥 Free Fire Diamonds</h1>
+      <button onclick="logout()" style="width:auto;padding:10px 20px">Déconnexion</button>
+    </div>
+
+    <div class="grid" id="pricesGrid"></div>
+
+    <div class="card" id="orderForm" style="display:none;margin-top:30px">
+      <h3>Commander</h3>
+      <input id="uid" placeholder="UID Free Fire">
+      <input id="pseudo" placeholder="Pseudo FF">
+      <input id="sender" placeholder="Numéro de l'envoyeur">
+      <input id="reference" placeholder="Référence de transaction">
+      <button onclick="submitOrder()">Envoyer la commande</button>
+    </div>
+
+    <div class="card" style="margin-top:30px">
+      <h3>Mes Commandes</h3>
+      <div id="ordersList"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+let token = localStorage.getItem('token');
+let selectedPack = null;
+const API = '';
+
+if(token) showShop();
+
+function toggleAuth(){ /* implémente register si besoin */ }
+
+async function login(){
+  const res = await fetch(API+'/api/login',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({email:email.value,password:password.value})
+  });
+  const data = await res.json();
+  if(data.token){localStorage.setItem('token',data.token);showShop();}
+  else alert(data.error);
+}
+
+function logout(){localStorage.removeItem('token');location.reload();}
+
+async function showShop(){
+  document.getElementById('loginPage').classList.remove('active');
+  document.getElementById('shopPage').classList.add('active');
+  loadPrices();loadOrders();
+}
+
+async function loadPrices(){
+  const res = await fetch(API+'/api/prices');
+  const prices = await res.json();
+  document.getElementById('pricesGrid').innerHTML = prices.map(p=>`
+    <div class="price-card card" onclick="selectPack(${p.id})">
+      <img src="${p.logoUrl}" alt="">
+      <h3>${p.name}</h3>
+      <p>${p.diamonds} 💎</p>
+      <h2>${p.price} FCFA</h2>
+    </div>
+  `).join('');
+}
+
+function selectPack(id){selectedPack=id;document.getElementById('orderForm').style.display='block';}
+
+async function submitOrder(){
+  const res = await fetch(API+'/api/order',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+    body:JSON.stringify({
+      uid:uid.value,pseudo:pseudo.value,packId:selectedPack,
+      senderNumber:sender.value,reference:reference.value
+    })
+  });
+  const data = await res.json();
+  if(data.ok){alert('Commande envoyée!');loadOrders();}
+}
+
+async function loadOrders(){
+  const res = await fetch(API+'/api/myorders',{headers:{'Authorization':'Bearer '+token}});
+  const orders = await res.json();
+  document.getElementById('ordersList').innerHTML = orders.map(o=>`
+    <p>UID:${o.uid} | Pack:${o.packId} | <span class="badge">${o.status}</span></p>
+  `).join('');
+}
+</script>
+</body>
+  </html>
