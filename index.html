@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="mg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>KIOS GAMER - RAHOLIMANANA BABY</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800;900&display=swap" rel="stylesheet">
+    <style>
+       .method-container {
+            display: flex;
+            gap: 10px;
+            margin: 15px auto;
+            justify-content: center;
+            width: 95%;
+        }
+       .method-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 140px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 12px 5px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+       .method-card img {
+            width: 38px;
+            height: 38px;
+            margin-bottom: 8px;
+            object-fit: contain;
+        }
+       .method-card span {
+            color: white;
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+       .method-card:has(input:checked) {
+            border-color: #00d2ff;
+            background: rgba(0, 210, 255, 0.1);
+            box-shadow: 0 0 10px rgba(0, 210, 255, 0.2);
+        }
+       .method-card input {
+            display: none;
+        }
+        :root {
+            --primary: #00d2ff;
+            --dark-bg: #0b0e11;
+            --card-bg: #161b22;
+            --success: #00ff88;
+            --danger: #ff4b4b;
+            --gold: #ffcc00;
+        }
+        html, body {
+            margin: 0; padding: 0;
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--dark-bg);
+            color: white;
+            overflow-x: hidden;
+        }
+       .page { display: none; padding: 10px; flex-direction: column; align-items: center; min-height: 100vh; }
+       .page.active { display: flex; }
+       .top-header {
+            width: 95%; max-width: 450px;
+            background: var(--card-bg); border-radius: 20px;
+            padding: 12px 15px; display: flex; justify-content: space-between; align-items: center;
+            margin: 10px 0; box-shadow: 0 4px 15px rgba(0,0,0,0.3); box-sizing: border-box;
+        }
+       .section-label { width: 95%; max-width: 450px; font-weight: 900; font-size: 13px; margin: 20px 0 10px; color: var(--primary); border-left: 4px solid var(--primary); padding-left: 10px; text-transform: uppercase; }
+       .item-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; width: 95%; max-width: 450px; margin-bottom: 25px; }
+       .shop-item { background: var(--card-bg); border-radius: 12px; overflow: hidden; text-align: center; border: 1px solid rgba(255,255,255,0.05); padding-bottom: 10px; transition: 0.2s; cursor: pointer; }
+       .shop-item img { width: 100%; height: 75px; object-fit: cover; }
+       .shop-item.qty { font-size: 9px; font-weight: 700; margin: 5px 0 2px; }
+       .shop-item.price { font-size: 10px; font-weight: 900; color: var(--primary); }
+       .game-card { border-radius: 18px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05); cursor: pointer; }
+       .game-card img { width: 100%; display: block; }
+        #payment-modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95); z-index: 1000; justify-content: center; align-items: center;
+        }
+       .modal-content {
+            background: var(--card-bg); width: 92%; max-width: 400px; border-radius: 30px;
+            padding: 20px; border: 1px solid rgba(255,255,255,0.1); text-align: center; position: relative;
+        }
+       .payment-method-selector { margin-bottom: 20px; }
+       .pay-box {
+            background: rgba(255,255,255,0.03); padding: 15px; border-radius: 20px;
+            cursor: pointer; margin-bottom: 12px; border: 2px solid transparent;
+            display: flex; align-items: center; gap: 15px; transition: 0.3s;
+        }
+       .pay-box.active { border-color: var(--primary); background: rgba(0,210,255,0.1); transform: scale(1.02); }
+       .pay-box img { width: 50px; height: 50px; border-radius: 12px; }
+       .details-container {
+            background: #0b0e11; border-radius: 20px; padding: 15px;
+            margin-top: 10px; border: 1px dashed var(--primary); display: none;
+        }
+       .info-row { margin-bottom: 8px; }
+       .info-label { font-size: 10px; color: #aaa; text-transform: uppercase; display: block; }
+       .info-value { font-size: 16px; font-weight: 900; color: var(--gold); letter-spacing: 1px; }
+       .info-name { font-size: 14px; font-weight: 800; color: var(--success); }
+       .input-group { margin: 15px 0; text-align: left; }
+       .input-group label { font-size: 10px; color: var(--primary); font-weight: 800; margin-left: 5px; }
+       .input-group input {
+            width: 100%; padding: 15px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1);
+            background: #0b0e11; color: white; box-sizing: border-box; outline: none; margin-top: 5px; font-weight: 600;
+        }
+       .btn-ussd {
+            width: 100%; background: var(--success); color: #000; border: none; padding: 16px;
+            border-radius: 15px; font-weight: 900; margin: 15px 0; cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 255, 136, 0.2);
+        }
+       .btn-confirm { width: 100%; background: var(--primary); color: #000; border: none; padding: 16px; border-radius: 15px; font-weight: 900; cursor: pointer; text-transform: uppercase; }
+        #custom-alert {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); z-index: 2000; justify-content: center; align-items: center;
+        }
+       .alert-box { background: var(--card-bg); padding: 30px; border-radius: 25px; border: 1px solid var(--danger); text-align: center; width: 280px; }
+    </style>
+</head>
+<body>
+
+    <!-- HOME PAGE -->
+    <div id="home-page" class="page active">
+        <div class="top-header">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <img src="https://i.supaimg.com/c0e791e5-ddc4-452f-a71e-d7d8beadb50a/3906f721-fb40-4a68-be9f-94a547a9f07e.jpg" style="width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--primary);">
+                <div style="font-weight:900; font-size: 15px;">KIOS <span style="color:var(--primary)">GAMER</span></div>
+            </div>
+            <i class="fa-solid fa-clock-rotate-left" style="font-size: 20px;"></i>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 95%; max-width: 450px; margin-top: 20px;">
+            <div class="game-card" onclick="openGame('ff')"><img src="https://i.supaimg.com/c0e791e5-ddc4-452f-a71e-d7d8beadb50a/70a2ffeb-c8e1-4dea-a4d2-b288d424b633.jpg"></div>
+            <div class="game-card" onclick="openGame('pubg')"><img src="https://i.supaimg.com/c0e791e5-ddc4-452f-a71e-d7d8beadb50a/ca8832d7-6bba-426c-a443-54630af18db4.jpg"></div>
+            <div class="game-card" onclick="openGame('mlbb')"><img src="https://i.supaimg.com/41a936fe-94cb-4a81-b51b-50ed3ddf5cf6/ff08a3c7-1acc-46ed-a7d9-b309caa68d83.jpg"></div>
+            <div class="game-card" onclick="openGame('bs')"><img src="https://i.supaimg.com/41a936fe-94cb-4a81-b51b-50ed3ddf5cf6/c4404a43-1826-461b-adc6-89a0d1a0ff13.jpg"></div>
+        </div>
+    </div>
+
+    <!-- SHOP PAGE -->
+    <div id="game-shop-page" class="page">
+        <div class="top-header">
+            <div id="game-title" style="font-weight:900; text-transform: uppercase;">SHOP</div>
+            <i class="fa-solid fa-house" onclick="showPage('home-page')" style="cursor:pointer;"></i>
+        </div>
+        <div style="width: 95%; max-width: 450px; background: var(--card-bg); padding: 15px; border-radius: 20px; box-sizing: border-box; margin-bottom: 15px;">
+            <div class="input-group"><label>Player ID</label><input type="number" id="player-uid" placeholder="Ampidiro ID..."></div>
+            <div class="input-group"><label>Pseudo</label><input type="text" id="player-pseudo" placeholder="Anarana anaty lalao..."></div>
+        </div>
+        <div id="shop-content" style="width: 100%; display: flex; flex-direction: column; align-items: center;"></div>
+    </div>
+
+    <!-- PAYMENT MODAL -->
+    <div id="payment-modal">
+        <div class="modal-content">
+            <div style="font-weight: 900; color: var(--primary); margin-bottom: 15px; font-size: 18px;">Paiement & Livraison</div>
+
+            <div class="pay-box" id="pay-mvola" onclick="selectMethod('mvola')">
+                <img src="https://i.supaimg.com/41a936fe-94cb-4a81-b51b-50ed3ddf5cf6/6d8efa53-9a5a-4228-8eb7-68e7e9c591b9.jpg">
+                <div style="text-align: left;"><b style="font-size: 14px;">MVOLA</b><br><small style="color: #aaa;">Transfert direct</small></div>
+            </div>
+
+            <div class="pay-box" id="pay-airtel" onclick="selectMethod('airtel')">
+                <img src="https://i.supaimg.com/41a936fe-94cb-4a81-b51b-50ed3ddf5cf6/49912d1d-00aa-497c-8a19-d35ff276299b.jpg">
+                <div style="text-align: left;"><b style="font-size: 14px;">AIRTEL MONEY</b><br><small style="color: #aaa;">Transfert direct</small></div>
+            </div>
+
+            <div id="details-box" class="details-container">
+                <div class="info-row">
+                    <span class="info-label">Envoyer à:</span>
+                    <span class="info-name">RAHOLIMANANA BABY</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Numéro:</span>
+                    <span class="info-value" id="display-number">034 66 159 39</span>
+                </div>
+            </div>
+
+            <div id="pay-step-2" style="display:none;">
+                <button class="btn-ussd" id="ussd-link"><i class="fa-solid fa-phone"></i> HANDEFA AUTOMATIQUE</button>
+                <div class="input-group">
+                    <label>Référence du transfert</label>
+                    <input type="text" id="pay-ref" placeholder="Laharana transaction...">
+                </div>
+                <button class="btn-confirm" onclick="confirmOrder()">Hanamarina ny fandoavana</button>
+            </div>
+
+            <div onclick="closePayment()" style="margin-top: 20px; font-size: 12px; color: var(--danger); font-weight: 800; cursor: pointer;">HANAFAKA (ANNULER)</div>
+        </div>
+    </div>
+
+    <!-- CUSTOM ALERT -->
+    <div id="custom-alert">
+        <div class="alert-box">
+            <p id="alert-msg" style="font-weight: 600;"></p>
+            <button style="background: var(--danger); color:white; border:none; padding:10px 20px; border-radius:10px; font-weight:800;" onclick="closeAlert()">D'ACCORD</button>
+        </div>
+    </div>
+
+    <script>
+        let selectedItem = null;
+        let selectedMethod = "";
+
+        const db = {
+            ff: { title: "Free Fire", sections: [{ name: "TOP UP", items: [{q:"110💎", p:4650, img:"https://i.supaimg.com/41a936fe-94cb-4a81-b51b-50ed3ddf5cf6/39a3758e-d220-41ba-9df8-8c89d4e074bc.jpg"},
+            {q:"220💎", p:9300, img:"https://i.supaimg.com/41a936fe-94cb-4a81-b51b-50ed3ddf5cf6/39a3758e-d220-41ba-9df8-8c89d4e074bc.jpg"},
+            {q:"330💎", p:13950, img:"https://i.supaimg.com/41a936fe-94cb-4a81-b51b-50ed3ddf5cf6/39a3758e-d220-41ba-9df8-8c89d4e074bc.jpg"}]}]},
+            pubg: { title: "PUBG", sections: [{ name: "🆄🅲", items:
+            [{q:"60 🆄🅲", p:5000, img:"https://i.supaimg.com/41a936fe-94cb-4a81-b51b-50ed3ddf5cf6/936729ef-cd45-4d1c-bc13-d75a19f47dd4.jpg"},
+            {q:"180 🆄🅲", p:15000, img:"https://i.supaimg.com/41a936fe-94cb-4a81-b51b-50ed3ddf5cf6/936729ef-cd45-4d1c-bc13-d75a19f47dd4.jpg"}]}]},
+            mlbb: { title: "Mobile Legends", sections: [
+                { name: "Diamonds", items: [
+                    {q:"55💠", p:4500, img:"https://i.supaimg.com/41a936fe-94cb-4a81-b51b-50ed3ddf5cf6/88c6162f-79bf-4cb8-ac1f-5e7b047ee1dc.jpg"},
+                    {q:"170💠", p:13400, img:"https://i.supaimg.com/41a936fe-94cb-4a81-b51b-50ed3ddf5cf6/88c6162f-79bf-4cb8-ac1f-5e7b047ee1dc.jpg"}
+                ]}
+            ]},
+            bs: { title: "Blood Strike", sections: [
+                { name: "Or Top Up", items: [
+                    {q:"55 🪙", p:2500, img:"https://i.supaimg.com/41a936fe-94cb-4a81-b51b-50ed3ddf5cf6/75eb2cef-f322-42d5-926a-101dbf4ade41.jpg"},
+                    {q:"102 🪙", p:5000, img:"https://i.supaimg.com/41a936fe-94cb-4a81-b51b-50ed3ddf5cf6/75eb2cef-f322-42d5-926a-101dbf4ade41.jpg"}
+                ]}
+            ]}
+        };
+
+        function showPage(id) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+
+        function openGame(key) {
+            const data = db[key];
+            document.getElementById('game-title').innerText = data.title;
+            const container = document.getElementById('shop-content');
+            container.innerHTML = '';
+            data.sections.forEach(sec => {
+                let html = `<div class="section-label">${sec.name}</div><div class="item-grid">`;
+                sec.items.forEach(item => {
+                    html += `<div class="shop-item" onclick="initBuy('${item.q}', ${item.p})"><img src="${item.img}"><div class="qty">${item.q}</div><div class="price">${item.p.toLocaleString()} Ar</div></div>`;
+                });
+                container.innerHTML += html + `</div>`;
+            });
+            showPage('game-shop-page');
+        }
+
+        function initBuy(q, p) {
+            const uid = document.getElementById('player-uid').value;
+            const pseudo = document.getElementById('player-pseudo').value;
+            if(!uid ||!pseudo) { showAlert("Fenoy ny Player ID sy Pseudo!"); return; }
+            selectedItem = { q, p, uid, pseudo };
+            document.getElementById('payment-modal').style.display = 'flex';
+        }
+
+        function selectMethod(m) {
+            selectedMethod = m;
+            document.querySelectorAll('.pay-box').forEach(b => b.classList.remove('active'));
+            document.getElementById(`pay-${m}`).classList.add('active');
+            document.getElementById('details-box').style.display = 'block';
+            document.getElementById('pay-step-2').style.display = 'block';
+
+            const num = (m === 'mvola')? "034 66 159 39" : "033 72 944 66";
+            document.getElementById('display-number').innerText = num;
+
+            const ussd = (m === 'mvola')
+               ? `tel:*111*1*2*0346615939*${selectedItem.p}*2*0%23#`
+                : `tel:*436*2*1*0337294466%23`;
+            document.getElementById('ussd-link').onclick = () => window.location.href = ussd;
+        }
+
+        function closePayment() {
+            document.getElementById('payment-modal').style.display = 'none';
+            document.getElementById('pay-step-2').style.display = 'none';
+            document.getElementById('details-box').style.display = 'none';
+            document.querySelectorAll('.pay-box').forEach(b => b.classList.remove('active'));
+        }
+
+        async function confirmOrder() {
+            const ref = document.getElementById('pay-ref').value;
+            if(!ref) { showAlert("Ampidiro ny laharana transaction!"); return; }
+
+            const orderData = {
+                q: selectedItem.q,
+                p: selectedItem.p,
+                uid: selectedItem.uid,
+                pseudo: selectedItem.pseudo,
+                method: selectedMethod,
+                ref: ref,
+                game: document.getElementById('game-title').innerText
+            };
+
+            try {
+                const res = await fetch('/api/order', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(orderData)
+                });
+
+                const data = await res.json();
+
+                if (data.success) {
+                    showAlert("Commande envoyée! On traite ça maintenant.");
+                    closePayment();
+                    showPage('home-page');
+                    document.getElementById('pay-ref').value = '';
+                } else {
+                    showAlert("Erreur lors de l'envoi.");
+                }
+            } catch (err) {
+                showAlert("Erreur serveur: " + err.message);
+            }
+        }
+
+        function showAlert(m) {
+            document.getElementById('alert-msg').innerText = m;
+            document.getElementById('custom-alert').style.display = 'flex';
+        }
+
+        function closeAlert() {
+            document.getElementById('custom-alert').style.display = 'none';
+        }
+    </script>
+</body>
+  </html>
