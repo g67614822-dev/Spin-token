@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="mg">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Dashboard - KIOS GAMER</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+  :root {
+    --primary: #00d2ff;
+    --dark-bg: #0b0e11;
+    --card-bg: #161b22;
+    --success: #00ff88;
+    --danger: #ff4b4b;
+    --gold: #ffcc00;
+  }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--dark-bg);
+    color: white;
+    font-family: 'Poppins', sans-serif;
+    padding: 20px;
+  }
+  h1, h2 { color: var(--primary); margin-bottom: 15px; }
+ .tabs {
+    display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;
+  }
+ .tab {
+    padding: 12px 20px;
+    background: var(--card-bg);
+    border-radius: 12px;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: 0.3s;
+  }
+ .tab.active { border-color: var(--primary); background: rgba(0,210,255,0.1); }
+ .tab-content { display: none; }
+ .tab-content.active { display: block; }
+
+ .card {
+    background: var(--card-bg);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 15px;
+  }
+  input, select {
+    width: 100%;
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: #0b0e11;
+    color: white;
+    margin-bottom: 10px;
+    outline: none;
+  }
+  button {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 10px;
+    font-weight: 800;
+    cursor: pointer;
+    margin-right: 8px;
+  }
+ .btn-primary { background: var(--primary); color: #000; }
+ .btn-success { background: var(--success); color: #000; }
+ .btn-danger { background: var(--danger); color: white; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+  }
+  th, td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+  th { color: var(--primary); font-size: 13px; }
+  img.thumb { width: 40px; height: 40px; object-fit: cover; border-radius: 8px; }
+
+ .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+  }
+ .stat-card {
+    background: var(--card-bg);
+    padding: 20px;
+    border-radius: 15px;
+    border-left: 4px solid var(--primary);
+  }
+ .stat-card h3 { font-size: 28px; color: var(--success); }
+</style>
+</head>
+<body>
+
+<h1><i class="fas fa-shield-alt"></i> KIOS GAMER ADMIN</h1>
+
+<div class="tabs">
+  <div class="tab active" onclick="showTab('dashboard')">Dashboard</div>
+  <div class="tab" onclick="showTab('orders')">Commandes</div>
+  <div class="tab" onclick="showTab('products')">Tarifs & Produits</div>
+  <div class="tab" onclick="showTab('payments')">Modes de Paiement</div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard" class="tab-content active">
+  <div class="stats">
+    <div class="stat-card">
+      <small>Total Commandes</small>
+      <h3 id="stat-orders">0</h3>
+    </div>
+    <div class="stat-card">
+      <small>Chiffre d'affaires</small>
+      <h3 id="stat-revenue">0 Ar</h3>
+    </div>
+    <div class="stat-card">
+      <small>Aujourd'hui</small>
+      <h3 id="stat-today">0</h3>
+    </div>
+  </div>
+  <div class="card">
+    <h2>Dernières Commandes</h2>
+    <div id="recent-orders"></div>
+  </div>
+</div>
+
+<!-- ORDERS -->
+<div id="orders" class="tab-content">
+  <div class="card">
+    <button class="btn-primary" onclick="loadOrders()"><i class="fas fa-sync"></i> Actualiser</button>
+    <table id="orders-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Jeu</th>
+          <th>Offre</th>
+          <th>Prix</th>
+          <th>Joueur</th>
+          <th>Méthode</th>
+          <th>Ref</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- PRODUCTS -->
+<div id="products" class="tab-content">
+  <div class="card">
+    <h2>Ajouter un Produit</h2>
+    <select id="prod-game">
+      <option value="ff">Free Fire</option>
+      <option value="pubg">PUBG</option>
+      <option value="mlbb">Mobile Legends</option>
+      <option value="bs">Blood Strike</option>
+    </select>
+    <input type="text" id="prod-section" placeholder="Section: TOP UP, Diamonds...">
+    <input type="text" id="prod-qty" placeholder="Quantité: 110💎, 60 UC...">
+    <input type="number" id="prod-price" placeholder="Prix en Ar">
+    <input type="text" id="prod-img" placeholder="URL Image">
+    <button class="btn-success" onclick="addProduct()">Ajouter</button>
+  </div>
+
+  <div class="card">
+    <h2>Liste des Produits</h2>
+    <div id="products-list"></div>
+  </div>
+</div>
+
+<!-- PAYMENTS -->
+<div id="payments" class="tab-content">
+  <div class="card">
+    <h2>Ajouter un Mode de Paiement</h2>
+    <input type="text" id="pay-name" placeholder="Nom: MVOLA, AIRTEL...">
+    <input type="text" id="pay-number" placeholder="Numéro: 0346615939">
+    <input type="text" id="pay-img" placeholder="URL Logo">
+    <input type="text" id="pay-ussd" placeholder="Code USSD: *111*1*2*num*montant%23">
+    <button class="btn-success" onclick="addPayment()">Ajouter</button>
+  </div>
+
+  <div class="card">
+    <h2>Modes de Paiement Actifs</h2>
+    <table id="payments-table">
+      <thead>
+        <tr><th>Logo</th><th>Nom</th><th>Numéro</th><th>Action</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+const API = '/api';
+
+function showTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById(tab).classList.add('active');
+
+  if(tab === 'dashboard') loadDashboard();
+  if(tab === 'orders') loadOrders();
+  if(tab === 'products') loadProducts();
+  if(tab === 'payments') loadPayments();
+}
+
+// DASHBOARD
+async function loadDashboard() {
+  const res = await fetch(API + '/orders');
+  const orders = await res.json();
+
+  document.getElementById('stat-orders').innerText = orders.length;
+  const revenue = orders.reduce((sum, o) => sum + o.p, 0);
+  document.getElementById('stat-revenue').innerText = revenue.toLocaleString() + ' Ar';
+
+  const today = new Date().toDateString();
+  const todayCount = orders.filter(o => new Date(o.date).toDateString() === today).length;
+  document.getElementById('stat-today').innerText = todayCount;
+
+  const recent = orders.slice(0, 5);
+  document.getElementById('recent-orders').innerHTML = recent.map(o =>
+    `<div style="padding:10px;border-bottom:1px solid rgba(255,255,255,0.1)">
+      ${o.game} - ${o.q} | ${o.p.toLocaleString()} Ar | ${o.pseudo}
+    </div>`
+  ).join('');
+}
+
+// ORDERS
+async function loadOrders() {
+  const res = await fetch(API + '/orders');
+  const orders = await res.json();
+
+  document.querySelector('#orders-table tbody').innerHTML = orders.map(o => `
+    <tr>
+      <td>${o.date}</td>
+      <td>${o.game}</td>
+      <td>${o.q}</td>
+      <td>${o.p.toLocaleString()} Ar</td>
+      <td>${o.pseudo} (${o.uid})</td>
+      <td>${o.method.toUpperCase()}</td>
+      <td>${o.ref}</td>
+    </tr>
+  `).join('');
+}
+
+// PRODUCTS
+async function loadProducts() {
+  const res = await fetch(API + '/products');
+  const products = await res.json();
+
+  let html = '';
+  for(let game in products) {
+    html += `<h3 style="margin:15px 0;color:var(--gold)">${game.toUpperCase()}</h3>`;
+    products[game].sections.forEach(sec => {
+      html += `<div class="card">
+        <h4>${sec.name}</h4>
+        <table>
+          <tr><th>Image</th><th>Offre</th><th>Prix</th><th>Action</th></tr>
+          ${sec.items.map((it, i) => `
+            <tr>
+              <td><img src="${it.img}" class="thumb"></td>
+              <td>${it.q}</td>
+              <td>${it.p.toLocaleString()} Ar</td>
+              <td><button class="btn-danger" onclick="deleteProduct('${game}','${sec.name}',${i})">Supprimer</button></td>
+            </tr>
+          `).join('')}
+        </table>
+      </div>`;
+    });
+  }
+  document.getElementById('products-list').innerHTML = html;
+}
+
+async function addProduct() {
+  const data = {
+    game: document.getElementById('prod-game').value,
+    section: document.getElementById('prod-section').value,
+    q: document.getElementById('prod-qty').value,
+    p: parseInt(document.getElementById('prod-price').value),
+    img: document.getElementById('prod-img').value
+  };
+
+  await fetch(API + '/products', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(data)
+  });
+
+  loadProducts();
+  alert('Produit ajouté!');
+}
+
+async function deleteProduct(game, section, index) {
+  await fetch(`${API}/products/delete`, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({game, section, index})
+  });
+  loadProducts();
+}
+
+// PAYMENTS
+async function loadPayments() {
+  const res = await fetch(API + '/payments');
+  const payments = await res.json();
+
+  document.querySelector('#payments-table tbody').innerHTML = payments.map((p, i) => `
+    <tr>
+      <td><img src="${p.img}" class="thumb"></td>
+      <td>${p.name}</td>
+      <td>${p.number}</td>
+      <td><button class="btn-danger" onclick="deletePayment(${i})">Supprimer</button></td>
+    </tr>
+  `).join('');
+}
+
+async function addPayment() {
+  const data = {
+    name: document.getElementById('pay-name').value,
+    number: document.getElementById('pay-number').value,
+    img: document.getElementById('pay-img').value,
+    ussd: document.getElementById('pay-ussd').value
+  };
+
+  await fetch(API + '/payments', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(data)
+  });
+
+  loadPayments();
+  alert('Mode de paiement ajouté!');
+}
+
+async function deletePayment(index) {
+  await fetch(`${API}/payments/delete`, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({index})
+  });
+  loadPayments();
+}
+
+loadDashboard();
+</script>
+</body>
+  </html>
